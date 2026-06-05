@@ -142,11 +142,11 @@ const RAW = [
 
 const CATS = [...new Set(RAW.map(r => r.cat))].sort();
 const CAT_COLORS = ["#534AB7","#1D9E75","#D85A30","#D4537E","#378ADD","#639922","#BA7517","#E24B4A","#0F6E56","#185FA5","#993C1D","#5DCAA5","#F0997B","#97C459","#ED93B1","#AFA9EC","#888780","#334155"];
-const totalRevAll = RAW.reduce((s,r) => s+r.revenue, 0);
-const totalSoldAll = RAW.reduce((s,r) => s+r.sold, 0);
-const avgRateAll = Math.round(RAW.reduce((s,r) => s+r.rate, 0) / RAW.length);
-const aprAll = RAW.reduce((s,r) => s+r.daily.slice(0,28).reduce((a,b)=>a+b,0), 0);
-const mayAll = RAW.reduce((s,r) => s+r.daily.slice(28).reduce((a,b)=>a+b,0), 0);
+const totalRevAll = RAW.reduce((s,r) => s + r.daily.reduce((a,b)=>a+b,0)*r.price, 0);
+const totalSoldAll = RAW.reduce((s,r) => s + r.daily.reduce((a,b)=>a+b,0), 0);
+const avgRateAll = Math.round(RAW.reduce((s,r) => s + Math.round(r.daily.reduce((a,b)=>a+b,0)/r.stock*100), 0) / RAW.length);
+const aprAll = RAW.reduce((s,r) => s + r.daily.slice(0,28).reduce((a,b)=>a+b,0), 0);
+const mayAll = RAW.reduce((s,r) => s + r.daily.slice(28).reduce((a,b)=>a+b,0), 0);
 const dailyAll = DATES.map((_,i) => RAW.reduce((s,r) => s+(r.daily[i]||0), 0));
 
 function fmtRev(n){
@@ -208,9 +208,11 @@ function App(){
 
   const prod = sp || RAW[0];
   const rankData = useMemo(() => RAW.map(r => {
-    const d = mf==="4월"?r.daily.slice(0,28):mf==="5월"?r.daily.slice(28):r.daily;
-    const sold = d.reduce((a,b)=>a+b,0);
-    return {...r, sold, revenue:sold*r.price, rate:Math.round(sold/r.stock*100)};
+    const daily = mf==="4월" ? r.daily.slice(0,28) : mf==="5월" ? r.daily.slice(28) : r.daily;
+    const sold = daily.reduce((a,b) => a+b, 0);
+    const revenue = sold * r.price;
+    const rate = Math.round(sold / r.stock * 100);
+    return {...r, sold, revenue, rate};
   }), [mf]);
   const filtered = useMemo(() => {
     let d = RAW;
