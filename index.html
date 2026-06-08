@@ -207,7 +207,7 @@ function App(){
   const [vm, setVm] = useState("daily");
 
   const prod = sp || RAW[0];
-  const rankData = useMemo(() => RAW.map(r => {
+  const rankData = useMemo(() => RAW.filter(r => r.code !== 1075).map(r => {
     const daily = mf==="4월" ? r.daily.slice(0,28) : mf==="5월" ? r.daily.slice(28) : r.daily;
     const sold = daily.reduce((a,b) => a+b, 0);
     const revenue = sold * r.price;
